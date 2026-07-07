@@ -1,7 +1,7 @@
 const SUPABASE_URL = "https://phlfqvfvqzfocsvzmsiw.supabase.co";
+// Paste the massive token string starting with eyJhbGciOi back here:
 const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBobGZxdmZ2cXpmb2Nzdnptc2l3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODM0MDcwNzksImV4cCI6MjA5ODk4MzA3OX0.VmpxumqUS5ZAGVdRInSfx6ykeLh_fXEabDt-azMbmSM";
 
-// FIXED: Renamed to supabaseClient to prevent clashing with the library's global variable
 const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 const emailInput = document.getElementById("email");
