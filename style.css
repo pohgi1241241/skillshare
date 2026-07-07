@@ -1,0 +1,93 @@
+/* --- Global Smooth Transitions --- */
+button, input, .result-card, .msg {
+    transition: all 0.25s ease-in-out;
+}
+
+/* --- Input Fields Interactivity --- */
+input:focus {
+    outline: none;
+    border-color: #818cf8;
+    box-shadow: 0 0 0 3px rgba(129, 140, 248, 0.2);
+    transform: translateY(-1px);
+}
+
+/* --- Interactive Button Hover & Press Effects --- */
+button:hover:not(:disabled) {
+    filter: brightness(1.1);
+    transform: translateY(-1px);
+    cursor: pointer;
+}
+
+button:active:not(:disabled) {
+    transform: translateY(1px);
+}
+
+button:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+/* --- Password Recovery Link Effect --- */
+#forgotPasswordBtn {
+    transition: color 0.2s ease, opacity 0.2s ease;
+}
+#forgotPasswordBtn:hover {
+    color: #818cf8;
+    text-decoration: underline;
+    cursor: pointer;
+}
+
+/* --- Toast / Notification Animations --- */
+#message {
+    opacity: 0;
+    transform: translateY(-10px);
+    transition: opacity 0.3s ease, transform 0.3s ease, background-color 0.3s ease;
+    pointer-events: none;
+}
+
+#message.show {
+    opacity: 1;
+    transform: translateY(0);
+    pointer-events: auto;
+    animation: pulseGlow 2s infinite alternate;
+}
+
+@keyframes pulseGlow {
+    0% { box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+    100% { box-shadow: 0 4px 12px rgba(129, 140, 248, 0.15); }
+}
+
+/* --- Dynamic Search Result Cards --- */
+.result-card {
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    background: rgba(255, 255, 255, 0.02);
+}
+
+.result-card:hover {
+    transform: translateY(-3px);
+    border-color: rgba(129, 140, 248, 0.3);
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+    background: rgba(255, 255, 255, 0.04);
+}
+
+/* --- Chat Room Message Pop-In --- */
+.msg {
+    animation: popIn 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+}
+
+@keyframes popIn {
+    0% {
+        opacity: 0;
+        transform: scale(0.95) translateY(5px);
+    }
+    100% {
+        opacity: 1;
+        transform: scale(1) translateY(0);
+    }
+}
+
+/* --- Smooth Section Hiding/Showing --- */
+.hidden {
+    display: none !important;
+    opacity: 0;
+}
