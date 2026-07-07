@@ -1,93 +1,70 @@
-/* --- Global Smooth Transitions --- */
-button, input, .result-card, .msg {
-    transition: all 0.25s ease-in-out;
+/* --- High-Tech Modern Background & Glow Elements --- */
+body {
+    background-color: #0b0f19;
+    background-image: 
+        radial-gradient(at 0% 0%, rgba(129, 140, 248, 0.08) 0px, transparent 50%),
+        radial-gradient(at 100% 100%, rgba(99, 102, 241, 0.05) 0px, transparent 50%);
+    color: #f3f4f6;
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    min-height: 100vh;
+    margin: 0;
 }
 
-/* --- Input Fields Interactivity --- */
-input:focus {
-    outline: none;
-    border-color: #818cf8;
-    box-shadow: 0 0 0 3px rgba(129, 140, 248, 0.2);
-    transform: translateY(-1px);
+/* --- Hero Headpage/Header UI --- */
+header, .headpage-title {
+    text-align: center;
+    padding: 2.5rem 1rem 1rem 1rem;
+    animation: fadeInDown 0.6s ease-out;
 }
 
-/* --- Interactive Button Hover & Press Effects --- */
-button:hover:not(:disabled) {
-    filter: brightness(1.1);
-    transform: translateY(-1px);
-    cursor: pointer;
+header h1, .headpage-title h1 {
+    font-size: 2.5rem;
+    font-weight: 800;
+    letter-spacing: -0.05em;
+    background: linear-gradient(135deg, #ffffff 30%, #a5b4fc 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    margin-bottom: 0.5rem;
 }
 
-button:active:not(:disabled) {
-    transform: translateY(1px);
+header p, .headpage-title p {
+    color: #9ca3af;
+    font-size: 1.1rem;
+    max-width: 600px;
+    margin: 0 auto;
 }
 
-button:disabled {
-    opacity: 0.6;
-    cursor: not-allowed;
+/* --- Glassmorphic Auth Container --- */
+#authSection {
+    background: rgba(17, 24, 39, 0.7);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 16px;
+    padding: 2rem;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+    animation: scaleUp 0.4s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-/* --- Password Recovery Link Effect --- */
-#forgotPasswordBtn {
-    transition: color 0.2s ease, opacity 0.2s ease;
-}
-#forgotPasswordBtn:hover {
-    color: #818cf8;
-    text-decoration: underline;
-    cursor: pointer;
-}
-
-/* --- Toast / Notification Animations --- */
-#message {
-    opacity: 0;
-    transform: translateY(-10px);
-    transition: opacity 0.3s ease, transform 0.3s ease, background-color 0.3s ease;
-    pointer-events: none;
-}
-
-#message.show {
-    opacity: 1;
-    transform: translateY(0);
-    pointer-events: auto;
-    animation: pulseGlow 2s infinite alternate;
-}
-
-@keyframes pulseGlow {
-    0% { box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
-    100% { box-shadow: 0 4px 12px rgba(129, 140, 248, 0.15); }
-}
-
-/* --- Dynamic Search Result Cards --- */
-.result-card {
-    border: 1px solid rgba(255, 255, 255, 0.05);
-    background: rgba(255, 255, 255, 0.02);
-}
-
-.result-card:hover {
-    transform: translateY(-3px);
-    border-color: rgba(129, 140, 248, 0.3);
-    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
-    background: rgba(255, 255, 255, 0.04);
-}
-
-/* --- Chat Room Message Pop-In --- */
-.msg {
-    animation: popIn 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
-}
-
-@keyframes popIn {
-    0% {
+/* --- Entrance Animations --- */
+@keyframes fadeInDown {
+    from {
         opacity: 0;
-        transform: scale(0.95) translateY(5px);
+        transform: translateY(-20px);
     }
-    100% {
+    to {
         opacity: 1;
-        transform: scale(1) translateY(0);
+        transform: translateY(0);
     }
 }
 
-/* --- Smooth Section Hiding/Showing --- */
-.hidden {
-    display: none !important;
-    opacity: 0;
+@keyframes scaleUp {
+    from {
+        opacity: 0;
+        transform: scale(0.96);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
 }
