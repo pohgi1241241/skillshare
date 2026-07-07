@@ -10,7 +10,6 @@
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            /* --- iOS Fluid Micro-interactions --- */
             transition: background 0.25s cubic-bezier(0.16, 1, 0.3, 1), 
                         border-color 0.25s cubic-bezier(0.16, 1, 0.3, 1), 
                         transform 0.3s cubic-bezier(0.15, 0.85, 0.3, 1.1), 
@@ -36,7 +35,6 @@
             --danger: #ef4444;
             --radius: 16px;
             --radius-sm: 10px;
-            /* --- Premium Glass Physics --- */
             --ios-blur: blur(20px) saturate(190%);
             --glass-shadow: 0 4px 30px rgba(0, 0, 0, 0.4), inset 0 1px 1px rgba(255, 255, 255, 0.1);
         }
@@ -50,7 +48,6 @@
             -webkit-font-smoothing: antialiased;
         }
 
-        /* Ambient Glow Background */
         body::before {
             content: '';
             position: fixed;
@@ -60,6 +57,34 @@
                 radial-gradient(circle at 85% 85%, rgba(168, 85, 247, 0.08), transparent 45%);
             pointer-events: none;
             z-index: 0;
+            animation: ambientShift 20s ease-in-out infinite;
+        }
+
+        /* iOS 27 Animated Background Mesh */
+        body::after {
+            content: '';
+            position: fixed;
+            top: -50%; left: -50%;
+            width: 200%; height: 200%;
+            background: 
+                radial-gradient(circle at 30% 30%, rgba(99, 102, 241, 0.08) 0%, transparent 40%),
+                radial-gradient(circle at 70% 70%, rgba(236, 72, 153, 0.05) 0%, transparent 40%),
+                radial-gradient(circle at 50% 50%, rgba(168, 85, 247, 0.06) 0%, transparent 50%);
+            pointer-events: none;
+            z-index: 0;
+            animation: meshMove 30s linear infinite;
+            opacity: 0.6;
+        }
+
+        @keyframes meshMove {
+            0% { transform: rotate(0deg) scale(1); }
+            50% { transform: rotate(180deg) scale(1.1); }
+            100% { transform: rotate(360deg) scale(1); }
+        }
+
+        @keyframes ambientShift {
+            0%, 100% { transform: translate(0, 0) scale(1); }
+            50% { transform: translate(20px, 20px) scale(1.05); }
         }
 
         .app-container {
@@ -68,9 +93,14 @@
             min-height: 100vh;
             display: flex;
             flex-direction: column;
+            animation: pageEnter 0.6s cubic-bezier(0.16, 1, 0.3, 1) backwards;
         }
 
-        /* Top Navigation Bar */
+        @keyframes pageEnter {
+            from { opacity: 0; transform: translateY(8px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
         .top-nav {
             display: flex;
             justify-content: space-between;
@@ -81,6 +111,12 @@
             -webkit-backdrop-filter: var(--ios-blur);
             border-bottom: 1px solid var(--border);
             box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.2);
+            animation: navSlide 0.5s cubic-bezier(0.16, 1, 0.3, 1) backwards;
+        }
+
+        @keyframes navSlide {
+            from { opacity: 0; transform: translateY(-100%); }
+            to { opacity: 1; transform: translateY(0); }
         }
 
         .logo {
@@ -102,6 +138,12 @@
             justify-content: center;
             font-size: 1rem;
             box-shadow: 0 0 20px rgba(99, 102, 241, 0.4);
+            animation: logoPulse 3s ease-in-out infinite;
+        }
+
+        @keyframes logoPulse {
+            0%, 100% { box-shadow: 0 0 20px rgba(99, 102, 241, 0.4); }
+            50% { box-shadow: 0 0 30px rgba(129, 140, 248, 0.6); }
         }
 
         .status-pill {
@@ -124,9 +166,14 @@
             background: var(--success);
             border-radius: 50%;
             box-shadow: 0 0 10px var(--success), 0 0 4px var(--success);
+            animation: statusPulse 2s ease-in-out infinite;
         }
 
-        /* Landing/Auth View Structure */
+        @keyframes statusPulse {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.6; transform: scale(0.85); }
+        }
+
         .auth-layout {
             max-width: 1000px;
             margin: 40px auto;
@@ -137,6 +184,12 @@
         .hero-banner {
             text-align: center;
             margin-bottom: 32px;
+            animation: heroEnter 0.8s cubic-bezier(0.16, 1, 0.3, 1) 0.1s backwards;
+        }
+
+        @keyframes heroEnter {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
         }
 
         .hero-banner h1 {
@@ -154,6 +207,13 @@
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             text-shadow: 0 0 30px rgba(129, 140, 248, 0.2);
+            background-size: 200% 200%;
+            animation: gradientFlow 4s ease infinite;
+        }
+
+        @keyframes gradientFlow {
+            0%, 100% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
         }
 
         .hero-banner p {
@@ -173,6 +233,12 @@
             border-radius: 24px;
             padding: 36px;
             box-shadow: var(--glass-shadow);
+            animation: cardFloat 0.8s cubic-bezier(0.16, 1, 0.3, 1) 0.2s backwards;
+        }
+
+        @keyframes cardFloat {
+            from { opacity: 0; transform: translateY(30px) scale(0.98); }
+            to { opacity: 1; transform: translateY(0) scale(1); }
         }
 
         .features-row {
@@ -187,27 +253,41 @@
             border: 1px solid var(--border);
             border-radius: var(--radius);
             padding: 20px;
+            animation: featureSlide 0.6s cubic-bezier(0.16, 1, 0.3, 1) backwards;
+        }
+
+        .feature-box:nth-child(1) { animation-delay: 0.3s; }
+        .feature-box:nth-child(2) { animation-delay: 0.4s; }
+
+        @keyframes featureSlide {
+            from { opacity: 0; transform: translateY(15px); }
+            to { opacity: 1; transform: translateY(0); }
         }
 
         .feature-box:hover {
-            transform: translateY(-2px);
-            border-color: rgba(255, 255, 255, 0.15);
-            background: rgba(255, 255, 255, 0.02);
+            transform: translateY(-3px) scale(1.01);
+            border-color: rgba(129, 140, 248, 0.4);
+            background: rgba(99, 102, 241, 0.08);
+            box-shadow: 0 10px 30px rgba(99, 102, 241, 0.15);
         }
 
         .feature-box h3 { font-size: 1rem; margin: 8px 0 4px; font-weight: 600; }
         .feature-box p { font-size: 0.82rem; color: var(--muted); line-height: 1.45; }
 
-        /* Workspace Layout Grid */
         .workspace-layout {
             flex: 1;
             display: grid;
             grid-template-columns: 340px 1fr;
             height: calc(100vh - 65px);
             overflow: hidden;
+            animation: workspaceEnter 0.6s cubic-bezier(0.16, 1, 0.3, 1) backwards;
         }
 
-        /* Left Side Panel: Messenger Sidebar */
+        @keyframes workspaceEnter {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
         .messenger-sidebar {
             background: rgba(8, 8, 12, 0.4);
             backdrop-filter: var(--ios-blur);
@@ -216,6 +296,12 @@
             display: flex;
             flex-direction: column;
             overflow: hidden;
+            animation: sidebarSlide 0.6s cubic-bezier(0.16, 1, 0.3, 1) backwards;
+        }
+
+        @keyframes sidebarSlide {
+            from { opacity: 0; transform: translateX(-30px); }
+            to { opacity: 1; transform: translateX(0); }
         }
 
         .sidebar-profile {
@@ -237,6 +323,12 @@
             display: flex; align-items: center; justify-content: center;
             color: white; font-weight: 700; font-size: 1.1rem;
             box-shadow: 0 0 15px rgba(99, 102, 241, 0.35);
+            animation: avatarGlow 4s ease-in-out infinite;
+        }
+
+        @keyframes avatarGlow {
+            0%, 100% { box-shadow: 0 0 15px rgba(99, 102, 241, 0.35); }
+            50% { box-shadow: 0 0 25px rgba(129, 140, 248, 0.6); }
         }
 
         .profile-meta { min-width: 0; }
@@ -253,7 +345,6 @@
             opacity: 0.9;
         }
 
-        /* Messenger Live Chat Feed Panel */
         .messenger-chat-area {
             flex: 1;
             display: flex;
@@ -281,6 +372,18 @@
             line-height: 1.45;
             border: 1px solid var(--border);
             box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+            animation: bubblePop 0.4s cubic-bezier(0.15, 0.85, 0.3, 1.1) backwards;
+        }
+
+        @keyframes bubblePop {
+            from { opacity: 0; transform: translateY(10px) scale(0.95); }
+            to { opacity: 1; transform: translateY(0) scale(1); }
+        }
+
+        .chat-bubble:hover {
+            background: rgba(255, 255, 255, 0.05);
+            border-color: rgba(129, 140, 248, 0.25);
+            transform: translateX(2px);
         }
 
         .chat-bubble .sender-tag {
@@ -298,20 +401,23 @@
             border-top: 1px solid var(--border);
         }
 
-        /* Right Side Panel: Roblox Discovery Feed */
         .roblox-main-hub {
             background: var(--bg);
             overflow-y: auto;
             padding: 28px;
+            animation: hubEnter 0.7s cubic-bezier(0.16, 1, 0.3, 1) 0.2s backwards;
         }
 
-        /* Custom Scrollbar */
+        @keyframes hubEnter {
+            from { opacity: 0; transform: translateY(15px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
         ::-webkit-scrollbar { width: 6px; height: 6px; }
         ::-webkit-scrollbar-track { background: transparent; }
-        ::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.08); border-radius: 99px; }
-        ::-webkit-scrollbar-thumb:hover { background: rgba(255, 255, 255, 0.2); }
+        ::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.08); border-radius: 99px; transition: background 0.2s; }
+        ::-webkit-scrollbar-thumb:hover { background: rgba(129, 140, 248, 0.4); }
 
-        /* Pill Filters */
         .roblox-filters {
             display: flex;
             gap: 8px;
@@ -330,12 +436,25 @@
             font-weight: 600;
             white-space: nowrap;
             cursor: pointer;
+            position: relative;
+            overflow: hidden;
         }
+
+        .filter-pill::before {
+            content: '';
+            position: absolute;
+            top: 0; left: -100%;
+            width: 100%; height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);
+            transition: left 0.5s ease;
+        }
+
+        .filter-pill:hover::before { left: 100%; }
 
         .filter-pill:hover {
             background: rgba(255, 255, 255, 0.06);
             border-color: rgba(255, 255, 255, 0.2);
-            transform: translateY(-1px);
+            transform: translateY(-2px);
         }
 
         .filter-pill.active {
@@ -347,6 +466,16 @@
 
         .hub-shelf {
             margin-bottom: 36px;
+            animation: shelfEnter 0.6s cubic-bezier(0.16, 1, 0.3, 1) backwards;
+        }
+
+        .hub-shelf:nth-child(1) { animation-delay: 0.3s; }
+        .hub-shelf:nth-child(2) { animation-delay: 0.4s; }
+        .hub-shelf:nth-child(3) { animation-delay: 0.5s; }
+
+        @keyframes shelfEnter {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
         }
 
         .shelf-title {
@@ -359,7 +488,6 @@
             gap: 8px;
         }
 
-        /* Matrix Grids */
         .roblox-grid {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
@@ -373,13 +501,29 @@
             overflow: hidden;
             cursor: pointer;
             box-shadow: 0 4px 15px rgba(0,0,0,0.15);
+            animation: cardEnter 0.5s cubic-bezier(0.16, 1, 0.3, 1) backwards;
+        }
+
+        .roblox-game-card:nth-child(1) { animation-delay: 0.1s; }
+        .roblox-game-card:nth-child(2) { animation-delay: 0.2s; }
+        .roblox-game-card:nth-child(3) { animation-delay: 0.3s; }
+        .roblox-game-card:nth-child(4) { animation-delay: 0.4s; }
+
+        @keyframes cardEnter {
+            from { opacity: 0; transform: scale(0.9); }
+            to { opacity: 1; transform: scale(1); }
         }
 
         .roblox-game-card:hover {
-            transform: scale(1.03) translateY(-4px);
+            transform: scale(1.04) translateY(-6px);
             border-color: var(--border-hover);
             background: var(--surface-hover);
-            box-shadow: 0 12px 24px rgba(0, 0, 0, 0.35), 0 0 15px rgba(129, 140, 248, 0.15);
+            box-shadow: 0 16px 32px rgba(0, 0, 0, 0.4), 0 0 20px rgba(129, 140, 248, 0.2);
+        }
+
+        .roblox-game-card:hover .card-display-icon {
+            transform: scale(1.08);
+            filter: brightness(1.1);
         }
 
         .card-display-icon {
@@ -390,6 +534,7 @@
             justify-content: center;
             font-size: 2.4rem;
             border-bottom: 1px solid var(--border);
+            transition: transform 0.4s cubic-bezier(0.15, 0.85, 0.3, 1.1);
         }
 
         .card-details {
@@ -414,7 +559,6 @@
             font-weight: 500;
         }
 
-        /* Settings Custom UI Control Frame */
         .roblox-settings-panel {
             background: var(--surface-card);
             backdrop-filter: var(--ios-blur);
@@ -424,6 +568,12 @@
             padding: 24px;
             margin-top: 28px;
             box-shadow: var(--glass-shadow);
+            animation: panelEnter 0.6s cubic-bezier(0.16, 1, 0.3, 1) 0.4s backwards;
+        }
+
+        @keyframes panelEnter {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
         }
 
         .settings-row {
@@ -439,7 +589,6 @@
             .messenger-sidebar { height: 350px; }
         }
 
-        /* Form Components */
         .form-label {
             font-size: 0.75rem;
             font-weight: 700;
@@ -474,7 +623,6 @@
             background: rgba(0, 0, 0, 0.5);
         }
 
-        /* Action Controls Buttons Configuration */
         .ui-btn {
             padding: 12px 18px;
             border: none;
@@ -486,6 +634,24 @@
             align-items: center;
             justify-content: center;
             gap: 6px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .ui-btn::before {
+            content: '';
+            position: absolute;
+            top: 50%; left: 50%;
+            width: 0; height: 0;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            transition: width 0.5s, height 0.5s;
+        }
+
+        .ui-btn:active::before {
+            width: 300px;
+            height: 300px;
         }
 
         .ui-btn:hover {
@@ -501,6 +667,9 @@
             background: linear-gradient(135deg, var(--accent-strong), #4f46e5); 
             color: white; 
             box-shadow: 0 4px 15px rgba(99, 102, 241, 0.35);
+        }
+        .ui-btn-primary:hover { 
+            box-shadow: 0 8px 25px rgba(99, 102, 241, 0.5); 
         }
         .ui-btn-secondary { 
             background: rgba(255, 255, 255, 0.04); 
@@ -523,7 +692,6 @@
         }
         .ui-btn-block { width: 100%; }
 
-        /* Helpers formatting */
         .divider-row {
             display: flex; align-items: center; gap: 12px; margin: 20px 0; color: var(--muted); font-size: 0.75rem;
             text-transform: uppercase; letter-spacing: 0.05em; font-weight: 500;
@@ -543,6 +711,23 @@
         @keyframes slideIn {
             from { opacity: 0; transform: translateY(-10px); }
             to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Ripple Effect on Click */
+        .ripple {
+            position: absolute;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.4);
+            transform: scale(0);
+            animation: ripple 0.6s ease-out;
+            pointer-events: none;
+        }
+
+        @keyframes ripple {
+            to {
+                transform: scale(4);
+                opacity: 0;
+            }
         }
     </style>
 </head>
@@ -717,5 +902,35 @@
     </div>
 
     <script src="app.js"></script>
+    <script>
+        // Add ripple effect to all buttons
+        document.addEventListener('click', function(e) {
+            const target = e.target.closest('.ui-btn, .filter-pill, .roblox-game-card, .feature-box');
+            if (!target) return;
+            
+            const ripple = document.createElement('span');
+            ripple.className = 'ripple';
+            const rect = target.getBoundingClientRect();
+            const size = Math.max(rect.width, rect.height);
+            ripple.style.width = ripple.style.height = size + 'px';
+            ripple.style.left = (e.clientX - rect.left - size / 2) + 'px';
+            ripple.style.top = (e.clientY - rect.top - size / 2) + 'px';
+            target.style.position = 'relative';
+            target.style.overflow = 'hidden';
+            target.appendChild(ripple);
+            
+            setTimeout(function() { ripple.remove(); }, 600);
+        });
+
+        // Filter pill toggle
+        document.querySelectorAll('.filter-pill').forEach(function(pill) {
+            pill.addEventListener('click', function() {
+                document.querySelectorAll('.filter-pill').forEach(function(p) {
+                    p.classList.remove('active');
+                });
+                pill.classList.add('active');
+            });
+        });
+    </script>
 </body>
 </html>
