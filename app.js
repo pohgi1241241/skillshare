@@ -5,12 +5,12 @@ const SUPABASE_URL = "https://phlfqvfvqzfocsvzmsiw.supabase.co";
 const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBobGZxdmZ2cXpmb2Nzdnptc2l3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODM0MDcwNzksImV4cCI6MjA5ODk4MzA3OX0.VmpxumqUS5ZAGVdRInSfx6ykeLh_fXEabDt-azMbmSM";
 
 // ============================================
-// INITIALIZE
+// INITIALIZE SUPABASE
 // ============================================
 const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 // ============================================
-// DOM
+// DOM ELEMENTS
 // ============================================
 const emailInput = document.getElementById("email");
 const passwordInput = document.getElementById("password");
@@ -32,197 +32,228 @@ const messageForm = document.getElementById("messageForm");
 const messageInput = document.getElementById("messageInput");
 
 // ============================================
-// HELPERS
+// HELPER FUNCTIONS
 // ============================================
 function showMessage(text, type) {
+    if (!messageDiv) { alert(text); return; }
     messageDiv.textContent = text;
     messageDiv.className = "show " + (type || "info");
     if (type === "success") {
-        setTimeout(() => { messageDiv.className = ""; }, 5000);
+        setTimeout(function () { messageDiv.className = ""; }, 5000);
     }
 }
 
 function showDashboard(user) {
+    if (!authSection || !dashboard) return;
     authSection.classList.add("hidden");
     dashboard.classList.remove("hidden");
     const name = (user.user_metadata && user.user_metadata.full_name) || user.email.split("@")[0];
-    const displayName = user.user_metadata?.full_name || name;
-    userName.textContent = displayName;
+    userName.textContent = name;
     userEmail.textContent = user.email;
-    userAvatar.textContent = (displayName[0] || "S").toUpperCase();
+    userAvatar.textContent = (name[0] || "S").toUpperCase();
 }
 
 function showAuth() {
+    if (!authSection || !dashboard) return;
     authSection.classList.remove("hidden");
     dashboard.classList.add("hidden");
     emailInput.value = "";
     passwordInput.value = "";
-    messageDiv.className = "";
+    if (messageDiv) messageDiv.className = "";
 }
 
 // ============================================
 // SIGN UP
 // ============================================
-signupBtn.addEventListener("click", async () => {
-    const email = emailInput.value.trim();
-    const password = passwordInput.value.trim();
+if (signupBtn) {
+    signupBtn.addEventListener("click", async function () {
+        const email = emailInput.value.trim();
+        const password = passwordInput.value.trim();
 
-    if (!email || !password) {
-        showMessage("Please enter email and password", "error");
-        return;
-    }
-    if (password.length < 6) {
-        showMessage("Password must be 6+ characters", "error");
-        return;
-    }
+        if (!email || !password) {
+            showMessage("Please enter email and password", "error");
+            return;
+        }
+        if (password.length < 6) {
+            showMessage("Password must be 6+ characters", "error");
+            return;
+        }
 
-    signupBtn.disabled = true;
-    const originalText = signupBtn.textContent;
-    signupBtn.textContent = "Creating...";
+        signupBtn.disabled = true;
+        const originalText = signupBtn.textContent;
+        signupBtn.textContent = "Creating...";
 
-    const { data, error } = await supabase.auth.signUp({ email, password });
+        const result = await supabase.auth.signUp({
+            email: email,
+            password: password
+        });
 
-    signupBtn.disabled = false;
-    signupBtn.textContent = originalText;
+        signupBtn.disabled = false;
+        signupBtn.textContent = originalText;
 
-    if (error) {
-        showMessage(error.message, "error");
-    } else {
-        showMessage("Account created! Check your email to confirm.", "success");
-    }
-});
+        if (result.error) {
+            showMessage(result.error.message, "error");
+        } else {
+            showMessage("Account created! Check your email to confirm.", "success");
+        }
+    });
+}
 
 // ============================================
 // LOGIN
 // ============================================
-loginBtn.addEventListener("click", async () => {
-    const email = emailInput.value.trim();
-    const password = passwordInput.value.trim();
+if (loginBtn) {
+    loginBtn.addEventListener("click", async function () {
+        const email = emailInput.value.trim();
+        const password = passwordInput.value.trim();
 
-    if (!email || !password) {
-        showMessage("Please enter email and password", "error");
-        return;
-    }
+        if (!email || !password) {
+            showMessage("Please enter email and password", "error");
+            return;
+        }
 
-    loginBtn.disabled = true;
-    const originalText = loginBtn.textContent;
-    loginBtn.textContent = "Logging in...";
+        loginBtn.disabled = true;
+        const originalText = loginBtn.textContent;
+        loginBtn.textContent = "Logging in...";
 
-    const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+        const result = await supabase.auth.signInWithPassword({
+            email: email,
+            password: password
+        });
 
-    loginBtn.disabled = false;
-    loginBtn.textContent = originalText;
+        loginBtn.disabled = false;
+        loginBtn.textContent = originalText;
 
-    if (error) {
-        showMessage(error.message, "error");
-    } else if (data.user) {
-        showDashboard(data.user);
-    }
-});
+        if (result.error) {
+            showMessage(result.error.message, "error");
+        } else if (result.data && result.data.user) {
+            showDashboard(result.data.user);
+        }
+    });
+}
 
 // ============================================
 // GOOGLE LOGIN
 // ============================================
-googleBtn.addEventListener("click", async () => {
-    const { error } = await supabase.auth.signInWithOAuth({
-        provider: "google",
-        options: { redirectTo: window.location.origin }
+if (googleBtn) {
+    googleBtn.addEventListener("click", async function () {
+        const result = await supabase.auth.signInWithOAuth({
+            provider: "google",
+            options: {
+                redirectTo: "https://skillsharejsorg.netlify.app"
+            }
+        });
+        if (result.error) {
+            showMessage(result.error.message, "error");
+        }
     });
-    if (error) showMessage(error.message, "error");
-});
+}
 
 // ============================================
 // LOGOUT
 // ============================================
-logoutBtn.addEventListener("click", async () => {
-    await supabase.auth.signOut();
-    showAuth();
-});
+if (logoutBtn) {
+    logoutBtn.addEventListener("click", async function () {
+        await supabase.auth.signOut();
+        showAuth();
+    });
+}
 
 // ============================================
 // SEARCH
 // ============================================
-searchBtn.addEventListener("click", async () => {
-    const query = searchInput.value.trim();
-    if (!query) {
-        searchResults.innerHTML = '<div class="empty"><div class="icon">🔎</div>Type a skill to search</div>';
-        return;
-    }
+if (searchBtn) {
+    searchBtn.addEventListener("click", async function () {
+        const query = searchInput.value.trim();
+        if (!query) {
+            searchResults.innerHTML = '<div class="empty"><div class="icon">🔎</div>Type a skill to search</div>';
+            return;
+        }
 
-    searchResults.innerHTML = '<div class="empty">Searching...</div>';
+        searchResults.innerHTML = '<div class="empty">Searching...</div>';
 
-    const { data, error } = await supabase
-        .from("profiles")
-        .select("*")
-        .ilike("skills_offered", "%" + query + "%");
+        const result = await supabase
+            .from("profiles")
+            .select("*")
+            .ilike("skills_offered", "%" + query + "%");
 
-    if (error) {
-        searchResults.innerHTML = '<div class="empty">' + error.message + '</div>';
-        return;
-    }
+        if (result.error) {
+            searchResults.innerHTML = '<div class="empty">' + result.error.message + '</div>';
+            return;
+        }
 
-    if (!data || data.length === 0) {
-        searchResults.innerHTML = '<div class="empty"><div class="icon">🤷</div>No results for "' + query + '"</div>';
-        return;
-    }
+        if (!result.data || result.data.length === 0) {
+            searchResults.innerHTML = '<div class="empty"><div class="icon">🤷</div>No results for "' + query + '"</div>';
+            return;
+        }
 
-    searchResults.innerHTML = data.map(p => `
-        <div class="result-card">
-            <h4>👤 ${p.full_name || "Anonymous"}</h4>
-            <div class="meta">
-                <strong>Offers:</strong> ${p.skills_offered || "N/A"}<br>
-                <strong>Needs:</strong> ${p.skills_needed || "N/A"}
-            </div>
-        </div>
-    `).join("");
-});
+        searchResults.innerHTML = result.data.map(function (p) {
+            return '<div class="result-card"><h4>👤 ' + (p.full_name || "Anonymous") + '</h4><div class="meta"><strong>Offers:</strong> ' + (p.skills_offered || "N/A") + '<br><strong>Needs:</strong> ' + (p.skills_needed || "N/A") + '</div></div>';
+        }).join("");
+    });
+}
 
-searchInput.addEventListener("keypress", (e) => {
-    if (e.key === "Enter") searchBtn.click();
-});
+if (searchInput) {
+    searchInput.addEventListener("keypress", function (e) {
+        if (e.key === "Enter") searchBtn.click();
+    });
+}
 
 // ============================================
 // CHAT
 // ============================================
-messageForm.addEventListener("submit", async (e) => {
-    e.preventDefault();
-    const text = messageInput.value.trim();
-    if (!text) return;
+if (messageForm) {
+    messageForm.addEventListener("submit", async function (e) {
+        e.preventDefault();
+        const text = messageInput.value.trim();
+        if (!text) return;
 
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return;
+        const userResult = await supabase.auth.getUser();
+        if (!userResult.data || !userResult.data.user) return;
 
-    const { error } = await supabase
-        .from("messages")
-        .insert([{ message_text: text, sender_id: user.id }]);
+        const insertResult = await supabase
+            .from("messages")
+            .insert([{ message_text: text, sender_id: userResult.data.user.id }]);
 
-    if (!error) messageInput.value = "";
-});
+        if (!insertResult.error) {
+            messageInput.value = "";
+        }
+    });
+}
 
 // ============================================
 // REALTIME
 // ============================================
-supabase
-    .channel("messages")
-    .on("postgres_changes", { event: "INSERT", schema: "public", table: "messages" }, (payload) => {
-        const msg = document.createElement("div");
-        msg.className = "msg";
-        const sender = (payload.new.sender_id || "s").slice(0, 6);
-        msg.innerHTML = `<div class="sender">Student ${sender}</div>${payload.new.message_text}`;
-        chatBox.appendChild(msg);
-        chatBox.scrollTop = chatBox.scrollHeight;
-    })
-    .subscribe();
+if (supabase) {
+    supabase
+        .channel("messages")
+        .on("postgres_changes", { event: "INSERT", schema: "public", table: "messages" }, function (payload) {
+            if (!chatBox) return;
+            const msg = document.createElement("div");
+            msg.className = "msg";
+            const sender = (payload.new.sender_id || "s").slice(0, 6);
+            msg.innerHTML = '<div class="sender">Student ' + sender + '</div>' + payload.new.message_text;
+            chatBox.appendChild(msg);
+            chatBox.scrollTop = chatBox.scrollHeight;
+        })
+        .subscribe();
+}
 
 // ============================================
 // SESSION CHECK
 // ============================================
-(async () => {
-    const { data: { session } } = await supabase.auth.getSession();
-    if (session?.user) showDashboard(session.user);
+(async function () {
+    const result = await supabase.auth.getSession();
+    if (result.data && result.data.session && result.data.session.user) {
+        showDashboard(result.data.session.user);
+    }
 })();
 
-supabase.auth.onAuthStateChange((event, session) => {
-    if (event === "SIGNED_IN" && session?.user) showDashboard(session.user);
-    else if (event === "SIGNED_OUT") showAuth();
+supabase.auth.onAuthStateChange(function (event, session) {
+    if (event === "SIGNED_IN" && session && session.user) {
+        showDashboard(session.user);
+    } else if (event === "SIGNED_OUT") {
+        showAuth();
+    }
 });
+ 
