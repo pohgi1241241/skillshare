@@ -9,6 +9,7 @@ const passwordInput = document.getElementById("password");
 const loginBtn = document.getElementById("loginBtn");
 const signupBtn = document.getElementById("signupBtn");
 const googleBtn = document.getElementById("googleBtn");
+const forgotPasswordBtn = document.getElementById("forgotPasswordBtn"); // Added for Password Recovery
 const logoutBtn = document.getElementById("logoutBtn");
 const searchBtn = document.getElementById("searchBtn");
 const searchInput = document.getElementById("searchInput");
@@ -49,6 +50,35 @@ function showAuth() {
     if (emailInput) emailInput.value = "";
     if (passwordInput) passwordInput.value = "";
     if (messageDiv) messageDiv.className = "";
+}
+
+// --- PASSWORD RECOVERY EVENT LISTENER ---
+if (forgotPasswordBtn) {
+    forgotPasswordBtn.addEventListener("click", async function () {
+        const email = emailInput ? emailInput.value.trim() : "";
+        
+        if (!email) {
+            showMessage("Please enter your school email address first.", "error");
+            return;
+        }
+
+        forgotPasswordBtn.style.pointerEvents = "none";
+        forgotPasswordBtn.style.opacity = "0.5";
+        showMessage("Sending recovery link...", "info");
+
+        const result = await supabaseClient.auth.resetPasswordForEmail(email, {
+            redirectTo: window.location.origin
+        });
+
+        forgotPasswordBtn.style.pointerEvents = "auto";
+        forgotPasswordBtn.style.opacity = "1";
+
+        if (result.error) {
+            showMessage(result.error.message, "error");
+        } else {
+            showMessage("Password reset email sent! Check your inbox.", "success");
+        }
+    });
 }
 
 if (signupBtn) {
