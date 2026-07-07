@@ -1,6 +1,5 @@
 const SUPABASE_URL = "https://phlfqvfvqzfocsvzmsiw.supabase.co";
-// Paste the massive token string starting with eyJhbGciOi back here:
-const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBobGZxdmZ2cXpmb2Nzdnptc2l3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODM0MDcwNzksImV4cCI6MjA5ODk4MzA3OX0.VmpxumqUS5ZAGVdRInSfx6ykeLh_fXEabDt-azMbmSM";
+const SUPABASE_ANON_KEY = "PUT-YOUR-REAL-ANON-KEY-HERE";
 
 const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
@@ -9,8 +8,9 @@ const passwordInput = document.getElementById("password");
 const loginBtn = document.getElementById("loginBtn");
 const signupBtn = document.getElementById("signupBtn");
 const googleBtn = document.getElementById("googleBtn");
-const forgotPasswordBtn = document.getElementById("forgotPasswordBtn"); // Added for Password Recovery
 const logoutBtn = document.getElementById("logoutBtn");
+const forgotPasswordBtn = document.getElementById("forgotPasswordBtn");
+const saveProfileBtn = document.getElementById("saveProfileBtn");
 const searchBtn = document.getElementById("searchBtn");
 const searchInput = document.getElementById("searchInput");
 const searchResults = document.getElementById("searchResults");
@@ -23,6 +23,7 @@ const userAvatar = document.getElementById("userAvatar");
 const chatBox = document.getElementById("chatBox");
 const messageForm = document.getElementById("messageForm");
 const messageInput = document.getElementById("messageInput");
+const editUsername = document.getElementById("editUsername");
 
 function showMessage(text, type) {
     if (!messageDiv) { alert(text); return; }
@@ -38,47 +39,19 @@ function showDashboard(user) {
     authSection.classList.add("hidden");
     dashboard.classList.remove("hidden");
     const name = (user.user_metadata && user.user_metadata.full_name) || user.email.split("@")[0];
-    if (userName) userName.textContent = name;
-    if (userEmail) userEmail.textContent = user.email;
-    if (userAvatar) userAvatar.textContent = (name[0] || "S").toUpperCase();
+    userName.textContent = name;
+    userEmail.value = user.email;
+    userAvatar.textContent = (name[0] || "S").toUpperCase();
+    if (editUsername) editUsername.value = name;
 }
 
 function showAuth() {
     if (!authSection || !dashboard) return;
     authSection.classList.remove("hidden");
     dashboard.classList.add("hidden");
-    if (emailInput) emailInput.value = "";
-    if (passwordInput) passwordInput.value = "";
+    emailInput.value = "";
+    passwordInput.value = "";
     if (messageDiv) messageDiv.className = "";
-}
-
-// --- PASSWORD RECOVERY EVENT LISTENER ---
-if (forgotPasswordBtn) {
-    forgotPasswordBtn.addEventListener("click", async function () {
-        const email = emailInput ? emailInput.value.trim() : "";
-        
-        if (!email) {
-            showMessage("Please enter your school email address first.", "error");
-            return;
-        }
-
-        forgotPasswordBtn.style.pointerEvents = "none";
-        forgotPasswordBtn.style.opacity = "0.5";
-        showMessage("Sending recovery link...", "info");
-
-        const result = await supabaseClient.auth.resetPasswordForEmail(email, {
-            redirectTo: window.location.origin
-        });
-
-        forgotPasswordBtn.style.pointerEvents = "auto";
-        forgotPasswordBtn.style.opacity = "1";
-
-        if (result.error) {
-            showMessage(result.error.message, "error");
-        } else {
-            showMessage("Password reset email sent! Check your inbox.", "success");
-        }
-    });
 }
 
 if (signupBtn) {
@@ -102,7 +75,7 @@ if (signupBtn) {
         if (result.error) {
             showMessage(result.error.message, "error");
         } else {
-            showMessage("Account created! Check email to confirm.", "success");
+            showMessage("Account created! Check your email to confirm.", "success");
         }
     });
 }
@@ -117,7 +90,7 @@ if (loginBtn) {
         }
         loginBtn.disabled = true;
         const originalText = loginBtn.textContent;
-        loginBtn.textContent = "Logging in...";
+        loginBtn.textContent = "Signing in...";
         const result = await supabaseClient.auth.signInWithPassword({ email: email, password: password });
         loginBtn.disabled = false;
         loginBtn.textContent = originalText;
@@ -125,6 +98,24 @@ if (loginBtn) {
             showMessage(result.error.message, "error");
         } else if (result.data && result.data.user) {
             showDashboard(result.data.user);
+        }
+    });
+}
+
+if (forgotPasswordBtn) {
+    forgotPasswordBtn.addEventListener("click", async function () {
+        const email = emailInput.value.trim();
+        if (!email) {
+            showMessage("Enter your email first, then click forgot password", "error");
+            return;
+        }
+        const result = await supabaseClient.auth.resetPasswordForEmail(email, {
+            redirectTo: window.location.origin
+        });
+        if (result.error) {
+            showMessage(result.error.message, "error");
+        } else {
+            showMessage("Password reset email sent! Check your inbox.", "success");
         }
     });
 }
@@ -148,25 +139,45 @@ if (logoutBtn) {
     });
 }
 
+if (saveProfileBtn) {
+    saveProfileBtn.addEventListener("click", async function () {
+        const newName = editUsername.value.trim();
+        if (!newName) {
+            showMessage("Please enter a display name", "error");
+            return;
+        }
+        const result = await supabaseClient.auth.updateUser({
+            data: { full_name: newName }
+        });
+        if (result.error) {
+            showMessage(result.error.message, "error");
+        } else {
+            userName.textContent = newName;
+            userAvatar.textContent = newName[0].toUpperCase();
+            showMessage("Profile updated!", "success");
+        }
+    });
+}
+
 if (searchBtn) {
     searchBtn.addEventListener("click", async function () {
         const query = searchInput.value.trim();
         if (!query) {
-            searchResults.innerHTML = '<div class="empty"><div class="icon">🔎</div>Type a skill to search</div>';
+            searchResults.innerHTML = '<div style="grid-column: 1/-1; text-align: center; color: var(--muted); padding: 20px;">Type a skill to search</div>';
             return;
         }
-        searchResults.innerHTML = '<div class="empty">Searching...</div>';
+        searchResults.innerHTML = '<div style="grid-column: 1/-1; text-align: center; color: var(--muted); padding: 20px;">Searching...</div>';
         const result = await supabaseClient.from("profiles").select("*").ilike("skills_offered", "%" + query + "%");
         if (result.error) {
-            searchResults.innerHTML = '<div class="empty">' + result.error.message + '</div>';
+            searchResults.innerHTML = '<div style="grid-column: 1/-1; text-align: center; color: var(--danger); padding: 20px;">' + result.error.message + '</div>';
             return;
         }
         if (!result.data || result.data.length === 0) {
-            searchResults.innerHTML = '<div class="empty"><div class="icon">🤷</div>No results for "' + query + '"</div>';
+            searchResults.innerHTML = '<div style="grid-column: 1/-1; text-align: center; color: var(--muted); padding: 20px;">No results for "' + query + '"</div>';
             return;
         }
         searchResults.innerHTML = result.data.map(function (p) {
-            return '<div class="result-card"><h4>👤 ' + (p.full_name || "Anonymous") + '</h4><div class="meta"><strong>Offers:</strong> ' + (p.skills_offered || "N/A") + '<br><strong>Needs:</strong> ' + (p.skills_needed || "N/A") + '</div></div>';
+            return '<div class="roblox-game-card"><div class="card-display-icon">👤</div><div class="card-details"><div class="game-title">' + (p.full_name || "Anonymous") + '</div><div class="game-stats">🎯 ' + (p.skills_offered || "N/A") + '</div></div></div>';
         }).join("");
     });
 }
@@ -195,9 +206,9 @@ if (supabaseClient) {
     supabaseClient.channel("messages").on("postgres_changes", { event: "INSERT", schema: "public", table: "messages" }, function (payload) {
         if (!chatBox) return;
         const msg = document.createElement("div");
-        msg.className = "msg";
+        msg.className = "chat-bubble";
         const sender = (payload.new.sender_id || "s").slice(0, 6);
-        msg.innerHTML = '<div class="sender">Student ' + sender + '</div>' + payload.new.message_text;
+        msg.innerHTML = '<div class="sender-tag">Student ' + sender + '</div>' + payload.new.message_text;
         chatBox.appendChild(msg);
         chatBox.scrollTop = chatBox.scrollHeight;
     }).subscribe();
