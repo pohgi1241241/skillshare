@@ -20,6 +20,9 @@ const dashboard = document.getElementById("dashboard");
 const userName = document.getElementById("userName");
 const userEmail = document.getElementById("userEmail");
 const userAvatar = document.getElementById("userAvatar");
+const menuAvatar = document.getElementById("menuAvatar");
+const menuUserName = document.getElementById("menuUserName");
+const menuUserEmail = document.getElementById("menuUserEmail");
 const chatBox = document.getElementById("chatBox");
 const messageForm = document.getElementById("messageForm");
 const messageInput = document.getElementById("messageInput");
@@ -39,15 +42,23 @@ function showDashboard(user) {
     authSection.classList.add("hidden");
     dashboard.classList.remove("hidden");
     const name = (user.user_metadata && user.user_metadata.full_name) || user.email.split("@")[0];
+    
+    // Update sidebar profile
     userName.textContent = name;
     userEmail.value = user.email;
     userAvatar.textContent = (name[0] || "S").toUpperCase();
+    
+    // Update burger menu profile
+    if (menuAvatar) menuAvatar.textContent = (name[0] || "S").toUpperCase();
+    if (menuUserName) menuUserName.textContent = name;
+    if (menuUserEmail) menuUserEmail.textContent = user.email;
+    
     if (editUsername) editUsername.value = name;
 }
 
 function showAuth() {
     if (!authSection || !dashboard) return;
-    authSection.classList.remove("hidden");
+    authSection.classList.add("hidden");
     dashboard.classList.add("hidden");
     emailInput.value = "";
     passwordInput.value = "";
@@ -152,9 +163,17 @@ if (saveProfileBtn) {
         if (result.error) {
             showMessage(result.error.message, "error");
         } else {
+            // Update everywhere
             userName.textContent = newName;
             userAvatar.textContent = newName[0].toUpperCase();
+            if (menuAvatar) menuAvatar.textContent = newName[0].toUpperCase();
+            if (menuUserName) menuUserName.textContent = newName;
+            
             showMessage("Profile updated!", "success");
+            
+            // Close the settings modal
+            const settingsModal = document.getElementById("settingsModal");
+            if (settingsModal) settingsModal.classList.remove("open");
         }
     });
 }

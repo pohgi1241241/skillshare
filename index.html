@@ -60,7 +60,6 @@
             animation: ambientShift 20s ease-in-out infinite;
         }
 
-        /* iOS 27 Animated Background Mesh */
         body::after {
             content: '';
             position: fixed;
@@ -117,6 +116,206 @@
         @keyframes navSlide {
             from { opacity: 0; transform: translateY(-100%); }
             to { opacity: 1; transform: translateY(0); }
+        }
+
+        .nav-left {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        /* Burger Menu Button */
+        .burger-btn {
+            width: 38px;
+            height: 38px;
+            border-radius: 10px;
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            color: var(--text);
+            position: relative;
+            z-index: 1001;
+        }
+
+        .burger-btn:hover {
+            background: rgba(255, 255, 255, 0.08);
+            border-color: var(--border-hover);
+            transform: scale(1.05);
+        }
+
+        .burger-btn:active {
+            transform: scale(0.95);
+        }
+
+        .burger-lines {
+            width: 18px;
+            height: 14px;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .burger-lines span {
+            display: block;
+            width: 100%;
+            height: 2px;
+            background: var(--text);
+            border-radius: 2px;
+            transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .burger-btn.open .burger-lines span:nth-child(1) {
+            transform: translateY(6px) rotate(45deg);
+        }
+
+        .burger-btn.open .burger-lines span:nth-child(2) {
+            opacity: 0;
+        }
+
+        .burger-btn.open .burger-lines span:nth-child(3) {
+            transform: translateY(-6px) rotate(-45deg);
+        }
+
+        /* Slide-out Menu */
+        .side-menu {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 320px;
+            height: 100vh;
+            background: rgba(8, 8, 14, 0.85);
+            backdrop-filter: var(--ios-blur);
+            -webkit-backdrop-filter: var(--ios-blur);
+            border-right: 1px solid var(--border);
+            z-index: 1000;
+            transform: translateX(-100%);
+            transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+            display: flex;
+            flex-direction: column;
+            box-shadow: 8px 0 32px rgba(0, 0, 0, 0.5);
+        }
+
+        .side-menu.open {
+            transform: translateX(0);
+        }
+
+        .menu-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(4px);
+            -webkit-backdrop-filter: blur(4px);
+            z-index: 999;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+        }
+
+        .menu-overlay.open {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .menu-header {
+            padding: 20px;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .menu-avatar {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--accent-strong), #c084fc);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 700;
+            font-size: 1.2rem;
+            box-shadow: 0 0 20px rgba(99, 102, 241, 0.4);
+        }
+
+        .menu-user-info { min-width: 0; }
+        .menu-user-name {
+            font-weight: 600;
+            font-size: 1rem;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .menu-user-email {
+            font-size: 0.78rem;
+            color: var(--muted);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .menu-section {
+            padding: 16px 12px;
+        }
+
+        .menu-section-title {
+            padding: 0 8px 8px;
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            color: var(--accent);
+            font-weight: 700;
+        }
+
+        .menu-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px;
+            border-radius: var(--radius-sm);
+            color: var(--text);
+            font-size: 0.92rem;
+            font-weight: 500;
+            cursor: pointer;
+            margin-bottom: 4px;
+        }
+
+        .menu-item:hover {
+            background: rgba(255, 255, 255, 0.06);
+            transform: translateX(4px);
+        }
+
+        .menu-item-icon {
+            width: 32px;
+            height: 32px;
+            border-radius: 8px;
+            background: var(--accent-soft);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.95rem;
+        }
+
+        .menu-item-text {
+            flex: 1;
+        }
+
+        .menu-item-arrow {
+            color: var(--muted);
+            font-size: 0.8rem;
+        }
+
+        .menu-footer {
+            margin-top: auto;
+            padding: 16px;
+            border-top: 1px solid var(--border);
         }
 
         .logo {
@@ -559,32 +758,51 @@
             font-weight: 500;
         }
 
-        .roblox-settings-panel {
+        /* Coming Soon Panel */
+        .coming-soon-panel {
             background: var(--surface-card);
             backdrop-filter: var(--ios-blur);
             -webkit-backdrop-filter: var(--ios-blur);
             border: 1px solid var(--border);
             border-radius: var(--radius);
-            padding: 24px;
+            padding: 48px 24px;
             margin-top: 28px;
             box-shadow: var(--glass-shadow);
-            animation: panelEnter 0.6s cubic-bezier(0.16, 1, 0.3, 1) 0.4s backwards;
+            text-align: center;
+            animation: shelfEnter 0.6s cubic-bezier(0.16, 1, 0.3, 1) 0.5s backwards;
         }
 
-        @keyframes panelEnter {
-            from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
+        .coming-soon-icon {
+            font-size: 3rem;
+            margin-bottom: 12px;
+            display: inline-block;
+            animation: rocketFloat 3s ease-in-out infinite;
         }
 
-        .settings-row {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 16px;
-            margin-top: 14px;
+        @keyframes rocketFloat {
+            0%, 100% { transform: translateY(0) rotate(-5deg); }
+            50% { transform: translateY(-8px) rotate(5deg); }
+        }
+
+        .coming-soon-title {
+            font-size: 1.3rem;
+            font-weight: 700;
+            margin-bottom: 6px;
+            background: linear-gradient(135deg, #a5b4fc, #e9d5ff);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .coming-soon-text {
+            color: var(--muted);
+            font-size: 0.88rem;
+            max-width: 400px;
+            margin: 0 auto;
+            line-height: 1.5;
         }
 
         @media (max-width: 500px) {
-            .settings-row { grid-template-columns: 1fr; }
             .workspace-layout { grid-template-columns: 1fr; }
             .messenger-sidebar { height: 350px; }
         }
@@ -713,7 +931,86 @@
             to { opacity: 1; transform: translateY(0); }
         }
 
-        /* Ripple Effect on Click */
+        /* Settings Modal */
+        .settings-modal {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            z-index: 2000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+        }
+
+        .settings-modal.open {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .settings-modal-content {
+            background: var(--surface-card);
+            backdrop-filter: var(--ios-blur);
+            -webkit-backdrop-filter: var(--ios-blur);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 28px;
+            max-width: 500px;
+            width: 90%;
+            box-shadow: var(--glass-shadow);
+            transform: scale(0.9) translateY(20px);
+            transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .settings-modal.open .settings-modal-content {
+            transform: scale(1) translateY(0);
+        }
+
+        .settings-modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .settings-modal-title {
+            font-size: 1.15rem;
+            font-weight: 700;
+        }
+
+        .modal-close-btn {
+            width: 32px;
+            height: 32px;
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--border);
+            color: var(--text);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.1rem;
+        }
+
+        .modal-close-btn:hover {
+            background: rgba(239, 68, 68, 0.15);
+            border-color: var(--danger);
+            color: var(--danger);
+        }
+
+        .settings-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+            margin-top: 14px;
+        }
+
         .ripple {
             position: absolute;
             border-radius: 50%;
@@ -735,12 +1032,97 @@
 
     <div class="app-container">
         <nav class="top-nav">
-            <div class="logo">
-                <div class="logo-box">🎓</div>
-                <span>SkillShare Hub</span>
+            <div class="nav-left">
+                <button class="burger-btn" id="burgerBtn" aria-label="Menu">
+                    <div class="burger-lines">
+                        <span></span>
+                        <span></span>
+                        <span></span>
+                    </div>
+                </button>
+                <div class="logo">
+                    <div class="logo-box">🎓</div>
+                    <span>SkillShare Hub</span>
+                </div>
             </div>
             <div class="status-pill">Active Cluster</div>
         </nav>
+
+        <!-- Side Menu (Burger) -->
+        <div class="menu-overlay" id="menuOverlay"></div>
+        <aside class="side-menu" id="sideMenu">
+            <div class="menu-header">
+                <div class="menu-avatar" id="menuAvatar">M</div>
+                <div class="menu-user-info">
+                    <div class="menu-user-name" id="menuUserName">Loading...</div>
+                    <div class="menu-user-email" id="menuUserEmail">user@email.com</div>
+                </div>
+            </div>
+
+            <div class="menu-section">
+                <div class="menu-section-title">Account</div>
+                <div class="menu-item" id="openSettingsBtn">
+                    <div class="menu-item-icon">⚙️</div>
+                    <div class="menu-item-text">Settings</div>
+                    <div class="menu-item-arrow">›</div>
+                </div>
+                <div class="menu-item" id="menuProfileBtn">
+                    <div class="menu-item-icon">👤</div>
+                    <div class="menu-item-text">Edit Profile</div>
+                    <div class="menu-item-arrow">›</div>
+                </div>
+                <div class="menu-item">
+                    <div class="menu-item-icon">🔔</div>
+                    <div class="menu-item-text">Notifications</div>
+                    <div class="menu-item-arrow">›</div>
+                </div>
+            </div>
+
+            <div class="menu-section">
+                <div class="menu-section-title">Hub</div>
+                <div class="menu-item">
+                    <div class="menu-item-icon">📚</div>
+                    <div class="menu-item-text">My Skills</div>
+                    <div class="menu-item-arrow">›</div>
+                </div>
+                <div class="menu-item">
+                    <div class="menu-item-icon">⭐</div>
+                    <div class="menu-item-text">Saved</div>
+                    <div class="menu-item-arrow">›</div>
+                </div>
+            </div>
+
+            <div class="menu-footer">
+                <button class="ui-btn ui-btn-danger ui-btn-block" id="menuLogoutBtn">
+                    🚪 Disconnect Session
+                </button>
+            </div>
+        </aside>
+
+        <!-- Settings Modal -->
+        <div class="settings-modal" id="settingsModal">
+            <div class="settings-modal-content">
+                <div class="settings-modal-header">
+                    <div class="settings-modal-title">⚙️ Account Settings</div>
+                    <button class="modal-close-btn" id="closeSettingsBtn">✕</button>
+                </div>
+
+                <div class="settings-row">
+                    <div>
+                        <label class="form-label">Display Name</label>
+                        <input type="text" id="editUsername" class="input-element" placeholder="Update display name...">
+                    </div>
+                    <div>
+                        <label class="form-label">Email (Read-Only)</label>
+                        <input type="text" id="userEmail" class="input-element" readonly disabled value="student@school.edu">
+                    </div>
+                </div>
+
+                <div style="display: flex; justify-content: flex-end; margin-top: 18px; padding-top: 12px; border-top: 1px solid var(--border);">
+                    <button class="ui-btn ui-btn-primary" id="saveProfileBtn">Save Configurations</button>
+                </div>
+            </div>
+        </div>
 
         <div id="authSection" class="auth-layout">
             <div class="hero-banner">
@@ -875,25 +1257,12 @@
                     </div>
                 </div>
 
-                <div class="roblox-settings-panel">
-                    <h3 style="font-size: 1.05rem; font-weight: 700; border-bottom: 1px solid var(--border); padding-bottom: 8px;">
-                        ⚙️ Account identification configuration
-                    </h3>
-                    
-                    <div class="settings-row">
-                        <div>
-                            <label class="form-label">System Record Identity Handle</label>
-                            <input type="text" id="editUsername" class="input-element" placeholder="Update display name...">
-                        </div>
-                        <div>
-                            <label class="form-label">School Email Route Address (Read-Only State)</label>
-                            <input type="text" id="userEmail" class="input-element" readonly disabled value="student@school.edu">
-                        </div>
-                    </div>
-
-                    <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 18px; padding-top: 12px; border-top: 1px solid var(--border);">
-                        <button class="ui-btn ui-btn-primary" id="saveProfileBtn">Save Configurations</button>
-                        <button class="ui-btn ui-btn-danger" id="logoutBtn">Disconnect Session</button>
+                <!-- Coming Soon Panel (replaces settings) -->
+                <div class="coming-soon-panel">
+                    <div class="coming-soon-icon">🚀</div>
+                    <div class="coming-soon-title">More Features Coming Soon</div>
+                    <div class="coming-soon-text">
+                        We're crafting more powerful tools for students. Stay tuned for exciting updates!
                     </div>
                 </div>
 
@@ -903,9 +1272,87 @@
 
     <script src="app.js"></script>
     <script>
-        // Add ripple effect to all buttons
+        // Burger menu toggle
+        const burgerBtn = document.getElementById("burgerBtn");
+        const sideMenu = document.getElementById("sideMenu");
+        const menuOverlay = document.getElementById("menuOverlay");
+
+        function openMenu() {
+            sideMenu.classList.add("open");
+            menuOverlay.classList.add("open");
+            burgerBtn.classList.add("open");
+        }
+
+        function closeMenu() {
+            sideMenu.classList.remove("open");
+            menuOverlay.classList.remove("open");
+            burgerBtn.classList.remove("open");
+        }
+
+        if (burgerBtn) {
+            burgerBtn.addEventListener("click", function() {
+                if (sideMenu.classList.contains("open")) {
+                    closeMenu();
+                } else {
+                    openMenu();
+                }
+            });
+        }
+
+        if (menuOverlay) {
+            menuOverlay.addEventListener("click", closeMenu);
+        }
+
+        // Settings modal
+        const openSettingsBtn = document.getElementById("openSettingsBtn");
+        const settingsModal = document.getElementById("settingsModal");
+        const closeSettingsBtn = document.getElementById("closeSettingsBtn");
+
+        function openSettings() {
+            settingsModal.classList.add("open");
+            closeMenu();
+        }
+
+        function closeSettings() {
+            settingsModal.classList.remove("open");
+        }
+
+        if (openSettingsBtn) {
+            openSettingsBtn.addEventListener("click", openSettings);
+        }
+
+        if (closeSettingsBtn) {
+            closeSettingsBtn.addEventListener("click", closeSettings);
+        }
+
+        if (settingsModal) {
+            settingsModal.addEventListener("click", function(e) {
+                if (e.target === settingsModal) closeSettings();
+            });
+        }
+
+        // Edit Profile also opens settings
+        const menuProfileBtn = document.getElementById("menuProfileBtn");
+        if (menuProfileBtn) {
+            menuProfileBtn.addEventListener("click", openSettings);
+        }
+
+        // Menu logout
+        const menuLogoutBtn = document.getElementById("menuLogoutBtn");
+        if (menuLogoutBtn) {
+            menuLogoutBtn.addEventListener("click", function() {
+                closeMenu();
+                if (typeof showAuth === "function") {
+                    showAuth();
+                }
+                // Trigger the actual logout
+                document.getElementById("logoutBtn")?.click();
+            });
+        }
+
+        // Ripple effect
         document.addEventListener('click', function(e) {
-            const target = e.target.closest('.ui-btn, .filter-pill, .roblox-game-card, .feature-box');
+            const target = e.target.closest('.ui-btn, .filter-pill, .roblox-game-card, .feature-box, .menu-item');
             if (!target) return;
             
             const ripple = document.createElement('span');
