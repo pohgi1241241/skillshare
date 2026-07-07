@@ -1,5 +1,5 @@
 const SUPABASE_URL = "https://phlfqvfvqzfocsvzmsiw.supabase.co";
-const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBobGZxdmZ2cXpmb2Nzdnptc2l3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODM0MDcwNzksImV4cCI6MjA5ODk4MzA3OX0.VmpxumqUS5ZAGVdRInSfx6ykeLh_fXEabDt-azMbmSM";
+const SUPABASE_ANON_KEY = "PUT-YOUR-REAL-ANON-KEY-HERE";
 
 const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
@@ -8,7 +8,6 @@ const passwordInput = document.getElementById("password");
 const loginBtn = document.getElementById("loginBtn");
 const signupBtn = document.getElementById("signupBtn");
 const googleBtn = document.getElementById("googleBtn");
-const logoutBtn = document.getElementById("logoutBtn");
 const forgotPasswordBtn = document.getElementById("forgotPasswordBtn");
 const saveProfileBtn = document.getElementById("saveProfileBtn");
 const searchBtn = document.getElementById("searchBtn");
@@ -43,12 +42,10 @@ function showDashboard(user) {
     dashboard.classList.remove("hidden");
     const name = (user.user_metadata && user.user_metadata.full_name) || user.email.split("@")[0];
     
-    // Update sidebar profile
     userName.textContent = name;
     userEmail.value = user.email;
     userAvatar.textContent = (name[0] || "S").toUpperCase();
     
-    // Update burger menu profile
     if (menuAvatar) menuAvatar.textContent = (name[0] || "S").toUpperCase();
     if (menuUserName) menuUserName.textContent = name;
     if (menuUserEmail) menuUserEmail.textContent = user.email;
@@ -63,6 +60,23 @@ function showAuth() {
     emailInput.value = "";
     passwordInput.value = "";
     if (messageDiv) messageDiv.className = "";
+    if (chatBox) chatBox.innerHTML = "";
+}
+
+async function handleLogout() {
+    try {
+        await supabaseClient.auth.signOut();
+        showAuth();
+        // Close the burger menu
+        const sideMenu = document.getElementById("sideMenu");
+        const menuOverlay = document.getElementById("menuOverlay");
+        const burgerBtn = document.getElementById("burgerBtn");
+        if (sideMenu) sideMenu.classList.remove("open");
+        if (menuOverlay) menuOverlay.classList.remove("open");
+        if (burgerBtn) burgerBtn.classList.remove("open");
+    } catch (err) {
+        console.error("Logout error:", err);
+    }
 }
 
 if (signupBtn) {
@@ -143,13 +157,6 @@ if (googleBtn) {
     });
 }
 
-if (logoutBtn) {
-    logoutBtn.addEventListener("click", async function () {
-        await supabaseClient.auth.signOut();
-        showAuth();
-    });
-}
-
 if (saveProfileBtn) {
     saveProfileBtn.addEventListener("click", async function () {
         const newName = editUsername.value.trim();
@@ -163,7 +170,6 @@ if (saveProfileBtn) {
         if (result.error) {
             showMessage(result.error.message, "error");
         } else {
-            // Update everywhere
             userName.textContent = newName;
             userAvatar.textContent = newName[0].toUpperCase();
             if (menuAvatar) menuAvatar.textContent = newName[0].toUpperCase();
@@ -171,7 +177,6 @@ if (saveProfileBtn) {
             
             showMessage("Profile updated!", "success");
             
-            // Close the settings modal
             const settingsModal = document.getElementById("settingsModal");
             if (settingsModal) settingsModal.classList.remove("open");
         }
@@ -245,5 +250,16 @@ supabaseClient.auth.onAuthStateChange(function (event, session) {
         showDashboard(session.user);
     } else if (event === "SIGNED_OUT") {
         showAuth();
+    }
+});
+
+// Burger menu logout - use the direct handler
+document.addEventListener("DOMContentLoaded", function() {
+    const menuLogoutBtn = document.getElementById("menuLogoutBtn");
+    if (menuLogoutBtn) {
+        menuLogoutBtn.addEventListener("click", function(e) {
+            e.preventDefault();
+            handleLogout();
+        });
     }
 });
