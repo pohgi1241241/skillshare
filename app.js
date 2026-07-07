@@ -1,7 +1,8 @@
 const SUPABASE_URL = "https://phlfqvfvqzfocsvzmsiw.supabase.co";
 const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBobGZxdmZ2cXpmb2Nzdnptc2l3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODM0MDcwNzksImV4cCI6MjA5ODk4MzA3OX0.VmpxumqUS5ZAGVdRInSfx6ykeLh_fXEabDt-azMbmSM";
 
-const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+// FIXED: Renamed to supabaseClient to prevent clashing with the library's global variable
+const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 const emailInput = document.getElementById("email");
 const passwordInput = document.getElementById("password");
@@ -36,17 +37,17 @@ function showDashboard(user) {
     authSection.classList.add("hidden");
     dashboard.classList.remove("hidden");
     const name = (user.user_metadata && user.user_metadata.full_name) || user.email.split("@")[0];
-    userName.textContent = name;
-    userEmail.textContent = user.email;
-    userAvatar.textContent = (name[0] || "S").toUpperCase();
+    if (userName) userName.textContent = name;
+    if (userEmail) userEmail.textContent = user.email;
+    if (userAvatar) userAvatar.textContent = (name[0] || "S").toUpperCase();
 }
 
 function showAuth() {
     if (!authSection || !dashboard) return;
     authSection.classList.remove("hidden");
     dashboard.classList.add("hidden");
-    emailInput.value = "";
-    passwordInput.value = "";
+    if (emailInput) emailInput.value = "";
+    if (passwordInput) passwordInput.value = "";
     if (messageDiv) messageDiv.className = "";
 }
 
@@ -65,7 +66,7 @@ if (signupBtn) {
         signupBtn.disabled = true;
         const originalText = signupBtn.textContent;
         signupBtn.textContent = "Creating...";
-        const result = await supabase.auth.signUp({ email: email, password: password });
+        const result = await supabaseClient.auth.signUp({ email: email, password: password });
         signupBtn.disabled = false;
         signupBtn.textContent = originalText;
         if (result.error) {
@@ -87,7 +88,7 @@ if (loginBtn) {
         loginBtn.disabled = true;
         const originalText = loginBtn.textContent;
         loginBtn.textContent = "Logging in...";
-        const result = await supabase.auth.signInWithPassword({ email: email, password: password });
+        const result = await supabaseClient.auth.signInWithPassword({ email: email, password: password });
         loginBtn.disabled = false;
         loginBtn.textContent = originalText;
         if (result.error) {
@@ -100,7 +101,7 @@ if (loginBtn) {
 
 if (googleBtn) {
     googleBtn.addEventListener("click", async function () {
-        const result = await supabase.auth.signInWithOAuth({
+        const result = await supabaseClient.auth.signInWithOAuth({
             provider: "google",
             options: { redirectTo: "https://skillsharejsorg.netlify.app" }
         });
@@ -112,7 +113,7 @@ if (googleBtn) {
 
 if (logoutBtn) {
     logoutBtn.addEventListener("click", async function () {
-        await supabase.auth.signOut();
+        await supabaseClient.auth.signOut();
         showAuth();
     });
 }
@@ -125,7 +126,7 @@ if (searchBtn) {
             return;
         }
         searchResults.innerHTML = '<div class="empty">Searching...</div>';
-        const result = await supabase.from("profiles").select("*").ilike("skills_offered", "%" + query + "%");
+        const result = await supabaseClient.from("profiles").select("*").ilike("skills_offered", "%" + query + "%");
         if (result.error) {
             searchResults.innerHTML = '<div class="empty">' + result.error.message + '</div>';
             return;
@@ -151,17 +152,17 @@ if (messageForm) {
         e.preventDefault();
         const text = messageInput.value.trim();
         if (!text) return;
-        const userResult = await supabase.auth.getUser();
+        const userResult = await supabaseClient.auth.getUser();
         if (!userResult.data || !userResult.data.user) return;
-        const insertResult = await supabase.from("messages").insert([{ message_text: text, sender_id: userResult.data.user.id }]);
+        const insertResult = await supabaseClient.from("messages").insert([{ message_text: text, sender_id: userResult.data.user.id }]);
         if (!insertResult.error) {
             messageInput.value = "";
         }
     });
 }
 
-if (supabase) {
-    supabase.channel("messages").on("postgres_changes", { event: "INSERT", schema: "public", table: "messages" }, function (payload) {
+if (supabaseClient) {
+    supabaseClient.channel("messages").on("postgres_changes", { event: "INSERT", schema: "public", table: "messages" }, function (payload) {
         if (!chatBox) return;
         const msg = document.createElement("div");
         msg.className = "msg";
@@ -173,13 +174,13 @@ if (supabase) {
 }
 
 (async function () {
-    const result = await supabase.auth.getSession();
+    const result = await supabaseClient.auth.getSession();
     if (result.data && result.data.session && result.data.session.user) {
         showDashboard(result.data.session.user);
     }
 })();
 
-supabase.auth.onAuthStateChange(function (event, session) {
+supabaseClient.auth.onAuthStateChange(function (event, session) {
     if (event === "SIGNED_IN" && session && session.user) {
         showDashboard(session.user);
     } else if (event === "SIGNED_OUT") {
