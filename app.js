@@ -418,11 +418,31 @@ if (messageForm) { messageForm.addEventListener("submit", async function(e) {
     e.preventDefault();
     const text = messageInput.value.trim();
     if (!text) return;
+    
     const userResult = await supabaseClient.auth.getUser();
-    if (!userResult.data || !userResult.data.user) return;
-    const insertResult = await supabaseClient.from("messages").insert([{ message_text: text, sender_id: userResult.data.user.id }]);
-    if (!insertResult.error) messageInput.value = "";
+    if (!userResult.data || !userResult.data.user) {
+        console.error("No user logged in");
+        return;
+    }
+    
+    const userId = userResult.data.user.id;
+    if (!userId) {
+        console.error("User ID is null");
+        return;
+    }
+    
+    const insertResult = await supabaseClient.from("messages").insert([{ 
+        message_text: text, 
+        sender_id: userId 
+    }]);
+    
+    if (!insertResult.error) {
+        messageInput.value = "";
+    } else {
+        console.error("Message insert error:", insertResult.error);
+    }
 });}
+
 
 if (supabaseClient) { supabaseClient.channel("messages").on("postgres_changes", { event: "INSERT", schema: "public", table: "messages" }, function(payload) {
     if (!chatBox) return;
