@@ -47,7 +47,7 @@ function loadUserProfile(user) {
     if (menuUserName) menuUserName.textContent = name;
     if (menuUserEmail) menuUserEmail.textContent = user.email;
     if (editUsername) editUsername.value = name;
-    supabaseClient.from("profiles").select("avatar_url").eq("user_id", user.id).single().then(function(result) {
+    supabaseClient.from("profiles").select("avatar_url").eq("user_id", user.id).maybeSingle().then(function(result) {
         if (result.data && result.data.avatar_url) {
             if (result.data.avatar_url.startsWith("http")) {
                 userAvatar.style.backgroundImage = "url('" + result.data.avatar_url + "')";
@@ -131,7 +131,12 @@ function resetSetupUI() {
 }
 
 async function isDisplayNameAvailable(name, currentUserId) {
-    const { data, error } = await supabaseClient.from("profiles").select("id").ilike("full_name", name).neq("user_id", currentUserId || "");
+    if (!currentUserId || currentUserId === "") {
+        const { data, error } = await supabaseClient.from("profiles").select("id").ilike("full_name", name);
+        if (error) return { available: true };
+        return { available: data.length === 0 };
+    }
+    const { data, error } = await supabaseClient.from("profiles").select("id").ilike("full_name", name).neq("user_id", currentUserId);
     if (error) return { available: true };
     return { available: data.length === 0 };
 }
@@ -197,7 +202,17 @@ document.addEventListener("DOMContentLoaded", function() {
             validation.className = "name-validation taken";
             return;
         }
-        const check = await isDisplayNameAvailable(name, setupData.userId);
+
+        const { data: { user } } = await supabaseClient.auth.getUser();
+        if (!user || !user.id) {
+            const validation = document.getElementById("nameValidation");
+            validation.textContent = "❌ Session error. Please try again.";
+            validation.className = "name-validation taken";
+            return;
+        }
+
+        setupData.userId = user.id;
+        const check = await isDisplayNameAvailable(name, user.id);
         if (!check.available) {
             const validation = document.getElementById("nameValidation");
             validation.textContent = "❌ This name is already taken. Try another!";
@@ -208,7 +223,7 @@ document.addEventListener("DOMContentLoaded", function() {
         const reviewName = document.getElementById("reviewName");
         if (reviewName) reviewName.textContent = name;
         const reviewUid = document.getElementById("reviewUid");
-        if (reviewUid) reviewUid.textContent = setupData.userId;
+        if (reviewUid) reviewUid.textContent = user.id;
         const reviewAvatar = document.getElementById("reviewAvatar");
         const preview = document.getElementById("avatarPreview");
         if (reviewAvatar && preview) {
@@ -232,14 +247,21 @@ document.addEventListener("DOMContentLoaded", function() {
 
     const finishSetup = document.getElementById("finishSetup");
     if (finishSetup) { finishSetup.addEventListener("click", async function() {
+        const { data: { user } } = await supabaseClient.auth.getUser();
+        if (!user || !user.id) {
+            document.getElementById("setupMessage").innerHTML = '<div class="status-message show error">❌ Session error. Please sign up again.</div>';
+            return;
+        }
+
         finishSetup.disabled = true;
         finishSetup.textContent = "Setting up...";
+
         try {
             let avatarUrl = null;
             if (setupData.avatarType === "upload" && setupData.avatarValue) {
                 const file = setupData.avatarValue;
                 const fileExt = file.name.split(".").pop();
-                const fileName = setupData.userId + "/avatar." + fileExt;
+                const fileName = user.id + "/avatar." + fileExt;
                 const { error: uploadError } = await supabaseClient.storage.from("avatars").upload(fileName, file, { upsert: true });
                 if (!uploadError) {
                     const { data: urlData } = supabaseClient.storage.from("avatars").getPublicUrl(fileName);
@@ -248,8 +270,29 @@ document.addEventListener("DOMContentLoaded", function() {
             } else if (setupData.avatarType === "preset") {
                 avatarUrl = setupData.avatarValue;
             }
+
             await supabaseClient.auth.updateUser({ data: { full_name: setupData.displayName } });
-            const { error: profileError } = await supabaseClient.from("profiles").update({ full_name: setupData.displayName, avatar_url: avatarUrl, setup_completed: true }).eq("user_id", setupData.userId);
+
+            const { data: existingProfile } = await supabaseClient
+                .from("profiles")
+                .select("id")
+                .eq("user_id", user.id)
+                .maybeSingle();
+
+            let profileError;
+            if (existingProfile) {
+                const result = await supabaseClient
+                    .from("profiles")
+                    .update({ full_name: setupData.displayName, avatar_url: avatarUrl, setup_completed: true })
+                    .eq("user_id", user.id);
+                profileError = result.error;
+            } else {
+                const result = await supabaseClient
+                    .from("profiles")
+                    .insert({ user_id: user.id, full_name: setupData.displayName, avatar_url: avatarUrl, setup_completed: true });
+                profileError = result.error;
+            }
+
             if (profileError) {
                 if (profileError.code === "23505") {
                     document.getElementById("setupMessage").innerHTML = '<div class="status-message show error">❌ Name was just taken. Go back and pick another.</div>';
@@ -259,9 +302,11 @@ document.addEventListener("DOMContentLoaded", function() {
                 }
                 throw profileError;
             }
-            const { data: { user } } = await supabaseClient.auth.getUser();
-            if (user) showDashboard(user);
+
+            showDashboard(user);
+
         } catch (err) {
+            console.error("Setup error:", err);
             document.getElementById("setupMessage").innerHTML = '<div class="status-message show error">❌ Error: ' + err.message + '</div>';
             finishSetup.disabled = false;
             finishSetup.textContent = "🚀 Enter Hub";
@@ -321,7 +366,7 @@ if (loginBtn) { loginBtn.addEventListener("click", async function() {
     loginBtn.textContent = originalText;
     if (result.error) { showMessage(result.error.message, "error"); }
     else if (result.data && result.data.user) {
-        const { data: profile } = await supabaseClient.from("profiles").select("setup_completed").eq("user_id", result.data.user.id).single();
+        const { data: profile } = await supabaseClient.from("profiles").select("setup_completed").eq("user_id", result.data.user.id).maybeSingle();
         if (profile && profile.setup_completed) { showDashboard(result.data.user); }
         else { setupData.userId = result.data.user.id; showProfileSetup(); }
     }
@@ -346,7 +391,7 @@ if (saveProfileBtn) { saveProfileBtn.addEventListener("click", async function() 
     saveProfileBtn.disabled = true;
     saveProfileBtn.textContent = "Checking...";
     const { data: { user } } = await supabaseClient.auth.getUser();
-    if (!user) { saveProfileBtn.disabled = false; saveProfileBtn.textContent = "Save Configurations"; return; }
+    if (!user || !user.id) { saveProfileBtn.disabled = false; saveProfileBtn.textContent = "Save Configurations"; return; }
     const check = await isDisplayNameAvailable(newName, user.id);
     if (!check.available) { saveProfileBtn.disabled = false; saveProfileBtn.textContent = "Save Configurations"; showMessage("❌ Display name already in use!", "error"); return; }
     saveProfileBtn.textContent = "Saving...";
@@ -418,31 +463,15 @@ if (messageForm) { messageForm.addEventListener("submit", async function(e) {
     e.preventDefault();
     const text = messageInput.value.trim();
     if (!text) return;
-    
     const userResult = await supabaseClient.auth.getUser();
-    if (!userResult.data || !userResult.data.user) {
-        console.error("No user logged in");
+    if (!userResult.data || !userResult.data.user || !userResult.data.user.id) {
+        console.error("No valid user for message");
         return;
     }
-    
     const userId = userResult.data.user.id;
-    if (!userId) {
-        console.error("User ID is null");
-        return;
-    }
-    
-    const insertResult = await supabaseClient.from("messages").insert([{ 
-        message_text: text, 
-        sender_id: userId 
-    }]);
-    
-    if (!insertResult.error) {
-        messageInput.value = "";
-    } else {
-        console.error("Message insert error:", insertResult.error);
-    }
+    const insertResult = await supabaseClient.from("messages").insert([{ message_text: text, sender_id: userId }]);
+    if (!insertResult.error) messageInput.value = "";
 });}
-
 
 if (supabaseClient) { supabaseClient.channel("messages").on("postgres_changes", { event: "INSERT", schema: "public", table: "messages" }, function(payload) {
     if (!chatBox) return;
@@ -456,8 +485,8 @@ if (supabaseClient) { supabaseClient.channel("messages").on("postgres_changes", 
 
 (async function() {
     const result = await supabaseClient.auth.getSession();
-    if (result.data && result.data.session && result.data.session.user) {
-        const { data: profile } = await supabaseClient.from("profiles").select("setup_completed").eq("user_id", result.data.session.user.id).single();
+    if (result.data && result.data.session && result.data.session.user && result.data.session.user.id) {
+        const { data: profile } = await supabaseClient.from("profiles").select("setup_completed").eq("user_id", result.data.session.user.id).maybeSingle();
         if (profile && profile.setup_completed) { showDashboard(result.data.session.user); }
         else { setupData.userId = result.data.session.user.id; showProfileSetup(); }
     }
